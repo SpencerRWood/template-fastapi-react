@@ -142,12 +142,12 @@ Ruff lint/format, and frontend Prettier formatting.
 
 ## Release Validation
 
-The release workflow validates the backend, frontend, repository hooks, and
-Docker Compose configuration before semantic-release:
+The release workflow validates the backend, frontend, and repository hooks
+before semantic-release:
 
 - Backend: `uv sync --frozen --group dev`, mypy, pytest, `uv build`
 - Frontend: `npm ci`, ESLint, TypeScript, Vitest, Vite build
-- Repository: pre-commit and `docker compose config`
+- Repository: pre-commit
 
 Backend Ruff and frontend Prettier run through pre-commit.
 
@@ -166,16 +166,37 @@ The frontend package version starts at the same value for search-and-replace
 clarity, but the default release workflow is repository-level rather than
 separate frontend/backend release tracks.
 
-## Copy And Rename
+## Automatic dev deployment
 
-After copying this template, replace these names everywhere:
+Pull requests use centralized validation. After a merge to `main`, the shared
+workflow creates a semantic release, publishes an immutable GHCR image with
+the built React frontend and FastAPI backend, and opens an infrastructure
+promotion PR for its digest-qualified reference. Infrastructure validates and
+automatically merges that PR, makes its patch release, and deploys to dev.
+The application repository owns the image and promotion request;
+infrastructure owns the dev image pin, Compose, Ansible, runtime secrets,
+migrations, health checks, and deployment policy.
 
-- repository/distribution name: `template-fastapi-react`
-- Python package name: `template_fastapi_react`
-- npm package name: `template-fastapi-react`
-- FastAPI title: `template-fastapi-react`
-- frontend page title: `template-fastapi-react`
+Before the first deployment, onboard the application in
+`SpencerRWood/infrastructure`: add `<app>_image_ref` to `environments/dev.yml`,
+the service and Compose definition, Ansible/runtime configuration and secrets,
+plus migrations, health checks, and ingress where applicable. Set the initial
+image pin to a valid digest-qualified image. This is a separate infrastructure
+change; the template does not create it.
 
-Then update package metadata, refresh locks with `uv lock` and `npm install`,
-and run the backend, frontend, pre-commit, and Docker Compose validation
-commands.
+Add the generated repository secret `INFRASTRUCTURE_PR_TOKEN`: a fine-grained
+token scoped only to `SpencerRWood/infrastructure` with Contents read/write,
+Pull requests read/write, Commit statuses read, and Metadata read. Do not
+commit the token. The promotion workflow consumes it through its standard
+`infrastructure_token` mapping.
+
+## Copy and rename
+
+After creating a repository from this template, run
+`python3 scripts/rename_project.py analytics-portal`, replacing
+`analytics-portal` with your lowercase repository slug. The script reads the
+existing `backend/pyproject.toml` project name and updates the Python package,
+npm lockfile, production Dockerfile, workflow `image_name`, and snake-case
+`image_key` together. Use the same slug for the GitHub repository. Then run
+`uv lock` in `backend`, `npm install` in `frontend`, and the backend, frontend,
+pre-commit, and Docker Compose checks.
