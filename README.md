@@ -169,8 +169,8 @@ separate frontend/backend release tracks.
 ## Automatic dev deployment
 
 Pull requests use centralized validation. After a merge to `main`, the shared
-workflow creates a semantic release, publishes an immutable GHCR image with
-the built React frontend and FastAPI backend, and opens an infrastructure
+v3 workflow builds and verifies an immutable GHCR image with the React frontend
+and FastAPI backend, creates a semantic release, and opens an infrastructure
 promotion PR for its digest-qualified reference. Infrastructure validates and
 automatically merges that PR, makes its patch release, and deploys to dev.
 The application repository owns the image and promotion request;
@@ -196,7 +196,7 @@ After creating a repository from this template, run
 `python3 scripts/rename_project.py analytics-portal`, replacing
 `analytics-portal` with your lowercase repository slug. The script reads the
 existing `backend/pyproject.toml` project name and updates the Python package,
-npm lockfile, production Dockerfile, workflow `image_name`, and snake-case
+npm lockfile, production Dockerfile, release configuration `image_name`, and snake-case
 `image_key` together. Use the same slug for the GitHub repository. Then run
 `uv lock` in `backend`, `npm install` in `frontend`, and the backend, frontend,
 pre-commit, and Docker Compose checks.
