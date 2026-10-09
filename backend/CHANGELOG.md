@@ -2,6 +2,14 @@
 
 <!-- version list -->
 
+## v0.0.2 (2026-10-09)
+
+### Bug Fixes
+
+- Include architecture metadata in released artifacts
+  ([`cedd9cb`](https://github.com/SpencerRWood/template-fastapi-react/commit/cedd9cbfa763b037d8e97aa229b6952bfa46253a))
+
+
 ## v0.0.1 (2026-09-23)
 
 ### Bug Fixes
