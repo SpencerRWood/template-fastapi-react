@@ -1,0 +1,4 @@
+[tool.wood.architecture]
+domain = "engineering"
+capability = "engineering-template"
+kind = "template"
