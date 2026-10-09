@@ -1,0 +1,4 @@
+[architecture]
+domain = "templates"
+capability = "project-scaffolding"
+kind = "fastapi-react-template"
