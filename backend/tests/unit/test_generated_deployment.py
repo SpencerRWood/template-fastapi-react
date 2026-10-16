@@ -1,5 +1,6 @@
 """Check the rendered full-stack workflow, not only its template source."""
 
+import re
 import runpy
 import shutil
 import tomllib
@@ -43,13 +44,21 @@ def test_generated_analytics_portal_deployment(tmp_path: Path) -> None:
     workflow = (project / ".github/workflows/release.yml").read_text()
     parsed = yaml.safe_load(workflow)
     jobs = parsed["jobs"]
-    assert jobs["release"]["uses"].endswith("/release-container.yml@v3")
+    assert re.fullmatch(
+        r"SpencerRWood/workflows/\.github/workflows/release-container\.yml@[a-f0-9]{40}",
+        jobs["release"]["uses"],
+    )
     assert jobs["release"]["permissions"] == {
         "contents": "write",
         "packages": "write",
+        "id-token": "write",
+        "attestations": "write",
     }
     assert "container" not in jobs
-    assert jobs["promotion"]["uses"].endswith("/promote-container-to-dev.yml@v2")
+    assert re.fullmatch(
+        r"SpencerRWood/workflows/\.github/workflows/promote-container-to-dev\.yml@[a-f0-9]{40}",
+        jobs["promotion"]["uses"],
+    )
     assert jobs["promotion"]["with"]["image_name"] == "analytics-portal"
     assert jobs["promotion"]["with"]["image_key"] == "analytics_portal_image_ref"
     assert jobs["promotion"]["with"]["version_image_digest"] == (
@@ -59,9 +68,13 @@ def test_generated_analytics_portal_deployment(tmp_path: Path) -> None:
         "INFRASTRUCTURE_PR_TOKEN"
         in jobs["promotion"]["secrets"]["infrastructure_token"]
     )
-    assert yaml.safe_load((project / ".github/workflows/validate.yml").read_text())[
-        "jobs"
-    ]["validation"]["uses"].endswith("/validate.yml@v3")
+    validation = yaml.safe_load(
+        (project / ".github/workflows/validate.yml").read_text()
+    )
+    assert re.fullmatch(
+        r"SpencerRWood/workflows/\.github/workflows/validate\.yml@[a-f0-9]{40}",
+        validation["jobs"]["validation"]["uses"],
+    )
     for forbidden in (
         "environment_file",
         "promotion_branch_prefix",
