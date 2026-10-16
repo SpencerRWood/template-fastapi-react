@@ -1,30 +1,46 @@
-name: Release
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  release:
-    uses: SpencerRWood/workflows/.github/workflows/release-container.yml@v3
-    permissions:
-      contents: write
-      packages: write
-
-  promotion:
-    needs: release
-    if: ${{ needs.release.outputs.released == 'true' }}
-    uses: SpencerRWood/workflows/.github/workflows/promote-container-to-dev.yml@v2
-    permissions:
-      contents: read
-    with:
-      infrastructure_repository: SpencerRWood/infrastructure
-      image_name: template-fastapi-react
-      image_key: template_fastapi_react_image_ref
-      release_tag: ${{ needs.release.outputs.release_tag }}
-      image_repository: ${{ needs.release.outputs.image_repository }}
-      version_image: ${{ needs.release.outputs.version_image }}
-      image_digest: ${{ needs.release.outputs.image_digest }}
-      version_image_digest: ${{ needs.release.outputs.version_image_digest }}
-    secrets:
-      infrastructure_token: ${{ secrets.INFRASTRUCTURE_PR_TOKEN }}
+{
+  "name": "Release",
+  "on": {
+    "push": {
+      "branches": [
+        "main"
+      ]
+    }
+  },
+  "jobs": {
+    "release": {
+      "uses": "SpencerRWood/workflows/.github/workflows/release-container.yml@1b806a4ebce73dcab2f0ecf26ffc47b00fac8ef7",
+      "permissions": {
+        "contents": "write",
+        "packages": "write",
+        "id-token": "write",
+        "attestations": "write"
+      },
+      "with": {
+        "workflow_revision": "1b806a4ebce73dcab2f0ecf26ffc47b00fac8ef7"
+      }
+    },
+    "promotion": {
+      "needs": "release",
+      "if": "${{ needs.release.outputs.released == 'true' }}",
+      "uses": "SpencerRWood/workflows/.github/workflows/promote-container-to-dev.yml@1b806a4ebce73dcab2f0ecf26ffc47b00fac8ef7",
+      "permissions": {
+        "contents": "read"
+      },
+      "with": {
+        "infrastructure_repository": "SpencerRWood/infrastructure",
+        "image_name": "template-fastapi-react",
+        "image_key": "template_fastapi_react_image_ref",
+        "release_tag": "${{ needs.release.outputs.release_tag }}",
+        "image_repository": "${{ needs.release.outputs.image_repository }}",
+        "version_image": "${{ needs.release.outputs.version_image }}",
+        "image_digest": "${{ needs.release.outputs.image_digest }}",
+        "version_image_digest": "${{ needs.release.outputs.version_image_digest }}",
+        "workflow_revision": "1b806a4ebce73dcab2f0ecf26ffc47b00fac8ef7"
+      },
+      "secrets": {
+        "infrastructure_token": "${{ secrets.INFRASTRUCTURE_PR_TOKEN }}"
+      }
+    }
+  }
+}
